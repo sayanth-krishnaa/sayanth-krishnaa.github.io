@@ -113,7 +113,16 @@ export default function AdminDashboard({
         body: JSON.stringify({ type, data }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Save failed");
+      if (!res.ok) {
+        if (res.status === 401) {
+          showNotification("error", "Your session has expired. Redirecting to login...");
+          setTimeout(() => {
+            router.push("/admin/login");
+          }, 1200);
+          return;
+        }
+        throw new Error(result.error || "Save failed");
+      }
       showNotification("success", `${type.charAt(0).toUpperCase() + type.slice(1)} saved successfully!`);
       router.refresh();
     } catch (err: unknown) {
