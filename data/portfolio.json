@@ -1,16 +1,16 @@
 {
   "profile": {
     "name": "Sayanth Krishna",
-    "role": "Full-Stack Developer & UI Designer",
+    "role": "Full-Stack Developer & QA",
     "tagline": "I build fast, interactive & modern web experiences.",
     "aboutShort": "Passionate Full-Stack Developer creating accessible, pixel-perfect, and delightful digital products. Turning ideas into real-world applications.",
     "aboutFull": "Hello! I am a passionate developer with a deep love for clean code, intuitive user experiences, and robust architectures. I design modern responsive interfaces and engineer reliable backend solutions. My workflow blends technical craftsmanship with design sensibility, ensuring every project is visually engaging, performant, and accessible.",
-    "email": "sayanth@example.com",
-    "phone": "+91 98765 43210",
+    "email": "sayanthkrishnap8@gmail.com",
+    "phone": "+91 6235625644",
     "location": "Kerala, India",
     "resumeUrl": "#",
     "github": "https://github.com/sayanth-krishnaa",
-    "linkedin": "https://linkedin.com",
+    "linkedin": "https://www.linkedin.com/in/sayanth-krishna-p/",
     "twitter": "https://twitter.com",
     "heroImage": "/assets/template/Background.png"
   },
@@ -116,7 +116,7 @@
   ],
   "projects": [],
   "admin": {
-    "username": "admin@portfolio.local",
-    "passwordHash": "$2a$10$EAonT0lvIdQSKc.QhjfU7uAyVWTKiyMnRixZXpJwqftIqD/41Oxve"
+    "username": "admin",
+    "passwordHash": "$2a$10$Ldhy6RP6uNnfkKBMAefKTufhQzBXEu.uzfMoY8xI2xCI0OMvbVbtu"
   }
 }

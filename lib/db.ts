@@ -33,16 +33,16 @@ function ensureDirectoryExists() {
 
 const DEFAULT_PROFILE: Profile = {
   name: "Sayanth Krishna",
-  role: "Front-end Developer / UI Designer",
+  role: "Full-Stack Developer & QA",
   tagline: "I build fast, interactive & modern web experiences.",
   aboutShort: "Passionate Developer creating accessible, pixel-perfect, and delightful digital products. Turning ideas into real-world applications.",
   aboutFull: "Hello! I am a passionate developer with a deep love for clean code, intuitive user experiences, and robust architectures. I design modern responsive interfaces and engineer reliable web solutions. My workflow blends technical craftsmanship with design sensibility, ensuring every project is visually engaging, performant, and accessible.",
-  email: "sayanth@example.com",
-  phone: "+91 98765 43210",
+  email: "sayanthkrishnap8@gmail.com",
+  phone: "+91 6235625644",
   location: "Kerala, India",
   resumeUrl: "#",
   github: "https://github.com/sayanth-krishnaa",
-  linkedin: "https://linkedin.com",
+  linkedin: "https://www.linkedin.com/in/sayanth-krishna-p/",
   twitter: "https://twitter.com",
   heroImage: "/assets/template/Background.png",
 };
@@ -205,8 +205,8 @@ export async function getPortfolioData(): Promise<PortfolioData> {
         skills,
         projects,
         admin: {
-          username: "admin@portfolio.local",
-          passwordHash: bcrypt.hashSync("admin12345", 10),
+          username: "admin",
+          passwordHash: bcrypt.hashSync("KITHUKRISHNA", 10),
         },
       };
     } catch (err) {
@@ -218,7 +218,7 @@ export async function getPortfolioData(): Promise<PortfolioData> {
   ensureDirectoryExists();
   if (!fs.existsSync(PORTFOLIO_FILE)) {
     const salt = bcrypt.genSaltSync(10);
-    const passwordHash = bcrypt.hashSync("admin12345", salt);
+    const passwordHash = bcrypt.hashSync("KITHUKRISHNA", salt);
 
     const initialData: PortfolioData = {
       profile: DEFAULT_PROFILE,
@@ -226,7 +226,7 @@ export async function getPortfolioData(): Promise<PortfolioData> {
       skills: DEFAULT_SKILLS,
       projects: DEFAULT_PROJECTS,
       admin: {
-        username: "admin@portfolio.local",
+        username: "admin",
         passwordHash,
       },
     };
@@ -248,8 +248,8 @@ export async function getPortfolioData(): Promise<PortfolioData> {
       skills: DEFAULT_SKILLS,
       projects: DEFAULT_PROJECTS,
       admin: {
-        username: "admin@portfolio.local",
-        passwordHash: bcrypt.hashSync("admin12345", 10),
+        username: "admin",
+        passwordHash: bcrypt.hashSync("KITHUKRISHNA", 10),
       },
     };
   }
