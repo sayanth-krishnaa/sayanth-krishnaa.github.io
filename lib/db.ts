@@ -4,13 +4,30 @@ import bcrypt from "bcryptjs";
 import { PortfolioData, ContactMessage, Skill, Project, ExploreService, Profile } from "@/types/portfolio";
 import { isSupabaseConfigured, getSupabaseAdmin } from "./supabase";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+// Serverless environments (Netlify, Vercel, AWS Lambda) have a read-only root filesystem.
+// In serverless, writable files must be in `/tmp`.
+const isServerless = !!(process.env.NETLIFY || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const BUNDLED_DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = isServerless ? path.join("/tmp", "portfolio_data") : BUNDLED_DATA_DIR;
+
 const PORTFOLIO_FILE = path.join(DATA_DIR, "portfolio.json");
 const MESSAGES_FILE = path.join(DATA_DIR, "messages.json");
 
 function ensureDirectoryExists() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    // If on serverless, copy initial bundled template data into /tmp if not already there
+    if (isServerless) {
+      const bundledPortfolio = path.join(BUNDLED_DATA_DIR, "portfolio.json");
+      const tmpPortfolio = path.join(DATA_DIR, "portfolio.json");
+      if (fs.existsSync(bundledPortfolio) && !fs.existsSync(tmpPortfolio)) {
+        fs.copyFileSync(bundledPortfolio, tmpPortfolio);
+      }
+    }
+  } catch (err) {
+    console.warn("Directory creation warning:", err);
   }
 }
 
@@ -193,11 +210,11 @@ export async function getPortfolioData(): Promise<PortfolioData> {
         },
       };
     } catch (err) {
-      console.warn("Supabase query error, falling back to local file store:", err);
+      console.warn("Supabase query error, falling back to local store:", err);
     }
   }
 
-  // Fallback to local atomic file store
+  // Fallback to local /tmp file store
   ensureDirectoryExists();
   if (!fs.existsSync(PORTFOLIO_FILE)) {
     const salt = bcrypt.genSaltSync(10);
@@ -213,18 +230,36 @@ export async function getPortfolioData(): Promise<PortfolioData> {
         passwordHash,
       },
     };
-    fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(initialData, null, 2), "utf8");
+    try {
+      fs.writeFileSync(PORTFOLIO_FILE, JSON.stringify(initialData, null, 2), "utf8");
+    } catch (e) {
+      console.warn("Initial data write warning:", e);
+    }
     return initialData;
   }
 
-  const raw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
-  return JSON.parse(raw) as PortfolioData;
+  try {
+    const raw = fs.readFileSync(PORTFOLIO_FILE, "utf8");
+    return JSON.parse(raw) as PortfolioData;
+  } catch {
+    return {
+      profile: DEFAULT_PROFILE,
+      services: DEFAULT_SERVICES,
+      skills: DEFAULT_SKILLS,
+      projects: DEFAULT_PROJECTS,
+      admin: {
+        username: "admin@portfolio.local",
+        passwordHash: bcrypt.hashSync("admin12345", 10),
+      },
+    };
+  }
 }
 
 export async function savePortfolioData(data: PortfolioData): Promise<void> {
   const sb = getSupabaseAdmin();
+  let supabaseSuccess = false;
 
-  // If Supabase is configured, sync directly to Supabase tables
+  // 1. If Supabase is configured, sync directly to Supabase tables
   if (sb) {
     try {
       await Promise.all([
@@ -278,16 +313,26 @@ export async function savePortfolioData(data: PortfolioData): Promise<void> {
           }))
         ),
       ]);
+      supabaseSuccess = true;
     } catch (err) {
-      console.warn("Supabase upsert error, syncing to local file store:", err);
+      console.warn("Supabase upsert error:", err);
     }
   }
 
-  // Always keep local file store in sync as well
-  ensureDirectoryExists();
-  const tempPath = `${PORTFOLIO_FILE}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
-  fs.renameSync(tempPath, PORTFOLIO_FILE);
+  // 2. Also save to local / /tmp store safely
+  try {
+    ensureDirectoryExists();
+    const tempPath = `${PORTFOLIO_FILE}.tmp`;
+    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf8");
+    fs.renameSync(tempPath, PORTFOLIO_FILE);
+  } catch (fsErr) {
+    console.warn("Local storage write warning:", fsErr);
+    // If Supabase succeeded, we don't need to throw an error
+    if (!supabaseSuccess && !sb) {
+      // If neither Supabase nor local disk succeeded
+      console.error("No writable storage available:", fsErr);
+    }
+  }
 }
 
 export async function getMessages(): Promise<ContactMessage[]> {
@@ -319,8 +364,12 @@ export async function getMessages(): Promise<ContactMessage[]> {
   if (!fs.existsSync(MESSAGES_FILE)) {
     return [];
   }
-  const raw = fs.readFileSync(MESSAGES_FILE, "utf8");
-  return JSON.parse(raw) as ContactMessage[];
+  try {
+    const raw = fs.readFileSync(MESSAGES_FILE, "utf8");
+    return JSON.parse(raw) as ContactMessage[];
+  } catch {
+    return [];
+  }
 }
 
 export async function addMessage(data: { name: string; email: string; phone?: string; message: string }): Promise<ContactMessage> {
@@ -354,10 +403,14 @@ export async function addMessage(data: { name: string; email: string; phone?: st
   const current = await getMessages();
   current.unshift(newMsg);
   
-  ensureDirectoryExists();
-  const tempPath = `${MESSAGES_FILE}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(current, null, 2), "utf8");
-  fs.renameSync(tempPath, MESSAGES_FILE);
+  try {
+    ensureDirectoryExists();
+    const tempPath = `${MESSAGES_FILE}.tmp`;
+    fs.writeFileSync(tempPath, JSON.stringify(current, null, 2), "utf8");
+    fs.renameSync(tempPath, MESSAGES_FILE);
+  } catch (fsErr) {
+    console.warn("Messages file write warning:", fsErr);
+  }
   return newMsg;
 }
 
@@ -373,8 +426,12 @@ export async function markMessageRead(id: string): Promise<void> {
 
   const messages = await getMessages();
   const updated = messages.map(m => m.id === id ? { ...m, read: true } : m);
-  ensureDirectoryExists();
-  fs.writeFileSync(MESSAGES_FILE, JSON.stringify(updated, null, 2), "utf8");
+  try {
+    ensureDirectoryExists();
+    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(updated, null, 2), "utf8");
+  } catch (e) {
+    console.warn("Mark read file write warning:", e);
+  }
 }
 
 export async function deleteMessage(id: string): Promise<void> {
@@ -389,6 +446,10 @@ export async function deleteMessage(id: string): Promise<void> {
 
   const messages = await getMessages();
   const updated = messages.filter(m => m.id !== id);
-  ensureDirectoryExists();
-  fs.writeFileSync(MESSAGES_FILE, JSON.stringify(updated, null, 2), "utf8");
+  try {
+    ensureDirectoryExists();
+    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(updated, null, 2), "utf8");
+  } catch (e) {
+    console.warn("Delete message file write warning:", e);
+  }
 }
