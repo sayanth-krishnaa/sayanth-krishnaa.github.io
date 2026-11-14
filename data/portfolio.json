@@ -1,0 +1,122 @@
+{
+  "profile": {
+    "name": "Sayanth Krishna",
+    "role": "Full-Stack Developer & UI Designer",
+    "tagline": "I build fast, interactive & modern web experiences.",
+    "aboutShort": "Passionate Full-Stack Developer creating accessible, pixel-perfect, and delightful digital products. Turning ideas into real-world applications.",
+    "aboutFull": "Hello! I am a passionate developer with a deep love for clean code, intuitive user experiences, and robust architectures. I design modern responsive interfaces and engineer reliable backend solutions. My workflow blends technical craftsmanship with design sensibility, ensuring every project is visually engaging, performant, and accessible.",
+    "email": "sayanth@example.com",
+    "phone": "+91 98765 43210",
+    "location": "Kerala, India",
+    "resumeUrl": "#",
+    "github": "https://github.com/sayanth-krishnaa",
+    "linkedin": "https://linkedin.com",
+    "twitter": "https://twitter.com",
+    "heroImage": "/assets/template/Background.png"
+  },
+  "services": [
+    {
+      "id": "service-design",
+      "title": "DESIGN",
+      "description": "I can design the site based on your needs and suggestions. I can also design the site from scratch and consult you during the whole process.",
+      "icon": "/assets/template/136378-200 1.png"
+    },
+    {
+      "id": "service-dev",
+      "title": "DEVELOPMENT",
+      "description": "I can build fast, accessible, and scalable web applications using modern frameworks like React, Next.js, and Node.js with attention to detail.",
+      "icon": "/assets/template/img_533288 1.png"
+    },
+    {
+      "id": "service-maint",
+      "title": "MAINTENANCE",
+      "description": "I can maintain, monitor, and optimize your live website to guarantee security, fast load times, and flawless operation around the clock.",
+      "icon": "/assets/template/maintenance--v3 1.png"
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk-react",
+      "name": "REACT",
+      "category": "using-now",
+      "icon": "react"
+    },
+    {
+      "id": "sk-tailwind",
+      "name": "TAILWIND CSS",
+      "category": "using-now",
+      "icon": "tailwind"
+    },
+    {
+      "id": "sk-bootstrap",
+      "name": "BOOTSTRAP",
+      "category": "using-now",
+      "icon": "/assets/template/bootstrap.svg"
+    },
+    {
+      "id": "sk-git",
+      "name": "GIT",
+      "category": "using-now",
+      "icon": "/assets/template/git.svg"
+    },
+    {
+      "id": "sk-figma",
+      "name": "FIGMA",
+      "category": "using-now",
+      "icon": "/assets/template/figma.svg"
+    },
+    {
+      "id": "sk-node",
+      "name": "NODEJS",
+      "category": "learning",
+      "icon": "nodejs"
+    },
+    {
+      "id": "sk-next",
+      "name": "NEXT.JS",
+      "category": "learning",
+      "icon": "nextjs"
+    },
+    {
+      "id": "sk-mongo",
+      "name": "MONGODB",
+      "category": "learning",
+      "icon": "mongodb"
+    },
+    {
+      "id": "sk-ts",
+      "name": "TYPESCRIPT",
+      "category": "learning",
+      "icon": "typescript"
+    },
+    {
+      "id": "sk-en",
+      "name": "ENGLISH (C1)",
+      "category": "other",
+      "icon": "languages"
+    },
+    {
+      "id": "sk-team",
+      "name": "TEAMWORK",
+      "category": "other",
+      "icon": "users"
+    },
+    {
+      "id": "sk-quick",
+      "name": "QUICK LEARNER",
+      "category": "other",
+      "icon": "zap"
+    },
+    {
+      "id": "sk-rest",
+      "name": "REST APIS",
+      "category": "other",
+      "icon": "globe"
+    }
+  ],
+  "projects": [],
+  "admin": {
+    "username": "admin@portfolio.local",
+    "passwordHash": "$2a$10$EAonT0lvIdQSKc.QhjfU7uAyVWTKiyMnRixZXpJwqftIqD/41Oxve"
+  }
+}
