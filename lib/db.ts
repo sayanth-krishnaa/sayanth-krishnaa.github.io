@@ -262,6 +262,23 @@ export async function savePortfolioData(data: PortfolioData): Promise<void> {
   // 1. If Supabase is configured, sync directly to Supabase tables
   if (sb) {
     try {
+      // Clean up deleted items from Supabase tables
+      const projectIds = data.projects.map((p) => p.id);
+      const skillIds = data.skills.map((s) => s.id);
+      const serviceIds = data.services.map((s) => s.id);
+
+      await Promise.all([
+        projectIds.length > 0
+          ? sb.from("projects").delete().not("id", "in", `(${projectIds.join(",")})`)
+          : sb.from("projects").delete().neq("id", ""),
+        skillIds.length > 0
+          ? sb.from("skills").delete().not("id", "in", `(${skillIds.join(",")})`)
+          : sb.from("skills").delete().neq("id", ""),
+        serviceIds.length > 0
+          ? sb.from("services").delete().not("id", "in", `(${serviceIds.join(",")})`)
+          : sb.from("services").delete().neq("id", ""),
+      ]);
+
       const results = await Promise.all([
         sb.from("profiles").upsert({
           id: "default",
@@ -280,41 +297,47 @@ export async function savePortfolioData(data: PortfolioData): Promise<void> {
           hero_image: data.profile.heroImage,
           updated_at: new Date().toISOString(),
         }),
-        sb.from("services").upsert(
-          data.services.map((s, index) => ({
-            id: s.id,
-            title: s.title,
-            description: s.description,
-            icon: s.icon,
-            display_order: index + 1,
-          }))
-        ),
-        sb.from("skills").upsert(
-          data.skills.map((s, index) => ({
-            id: s.id,
-            name: s.name,
-            category: s.category,
-            icon: s.icon,
-            display_order: index + 1,
-          }))
-        ),
-        sb.from("projects").upsert(
-          data.projects.map((p, index) => ({
-            id: p.id,
-            title: p.title,
-            category: p.category,
-            description: p.description,
-            image: p.image,
-            demo_url: p.demoUrl,
-            github_url: p.githubUrl,
-            tags: p.tags,
-            featured: p.featured,
-            display_order: index + 1,
-          }))
-        ),
+        data.services.length > 0
+          ? sb.from("services").upsert(
+              data.services.map((s, index) => ({
+                id: s.id,
+                title: s.title,
+                description: s.description,
+                icon: s.icon,
+                display_order: index + 1,
+              }))
+            )
+          : Promise.resolve({ error: null }),
+        data.skills.length > 0
+          ? sb.from("skills").upsert(
+              data.skills.map((s, index) => ({
+                id: s.id,
+                name: s.name,
+                category: s.category,
+                icon: s.icon,
+                display_order: index + 1,
+              }))
+            )
+          : Promise.resolve({ error: null }),
+        data.projects.length > 0
+          ? sb.from("projects").upsert(
+              data.projects.map((p, index) => ({
+                id: p.id,
+                title: p.title,
+                category: p.category,
+                description: p.description,
+                image: p.image,
+                demo_url: p.demoUrl,
+                github_url: p.githubUrl,
+                tags: p.tags,
+                featured: p.featured,
+                display_order: index + 1,
+              }))
+            )
+          : Promise.resolve({ error: null }),
       ]);
 
-      const errResult = results.find((r) => r.error);
+      const errResult = results.find((r) => r && "error" in r && r.error);
       if (errResult && errResult.error) {
         console.error("Supabase upsert returned error:", errResult.error);
       } else {
