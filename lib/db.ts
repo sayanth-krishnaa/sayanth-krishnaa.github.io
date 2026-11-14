@@ -262,7 +262,7 @@ export async function savePortfolioData(data: PortfolioData): Promise<void> {
   // 1. If Supabase is configured, sync directly to Supabase tables
   if (sb) {
     try {
-      await Promise.all([
+      const results = await Promise.all([
         sb.from("profiles").upsert({
           id: "default",
           name: data.profile.name,
@@ -313,7 +313,13 @@ export async function savePortfolioData(data: PortfolioData): Promise<void> {
           }))
         ),
       ]);
-      supabaseSuccess = true;
+
+      const errResult = results.find((r) => r.error);
+      if (errResult && errResult.error) {
+        console.error("Supabase upsert returned error:", errResult.error);
+      } else {
+        supabaseSuccess = true;
+      }
     } catch (err) {
       console.warn("Supabase upsert error:", err);
     }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
 import { getPortfolioData, savePortfolioData } from "@/lib/db";
 import {
@@ -78,6 +79,13 @@ export async function PUT(request: Request) {
     }
 
     await savePortfolioData(currentData);
+
+    try {
+      revalidatePath("/", "page");
+      revalidatePath("/admin", "page");
+    } catch (e) {
+      console.warn("Revalidation warning:", e);
+    }
 
     return NextResponse.json({
       success: true,
